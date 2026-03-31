@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sequence Builder — Humanfunnel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0d1117;--ink2:#374151;--ink3:#6b7280;
+  --paper:#f5f4f1;--paper2:#eeece8;--paper3:#e2dfd9;--white:#fff;
+  --accent:#FF4D43;--accent-d:#d93c32;
+  --navy:#1C2D3E;--navy2:#2a4560;
+  --li-bg:#dbeafe;--li-fg:#1d4ed8;
+  --em-bg:#dcfce7;--em-fg:#15803d;
+  --tel-bg:#fef9c3;--tel-fg:#854d0e;
+  --r:12px;--r-sm:7px;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;line-height:1.6;font-size:15px}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:50;background:rgba(245,244,241,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--paper3);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:-.02em}
+.logo em{color:var(--accent);font-style:normal}
+.hdr-tag{font-size:11px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;background:var(--paper2);border:1px solid var(--paper3);padding:4px 10px;border-radius:20px}
+
+/* WRAP */
+.wrap{max-width:760px;margin:0 auto;padding:52px 24px 100px}
+
+/* PROGRESS */
+.prog{display:flex;align-items:center;margin-bottom:52px}
+.pdot{width:28px;height:28px;border-radius:50%;border:2px solid var(--paper3);background:var(--white);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--ink3);flex-shrink:0;transition:all .25s;position:relative}
+.pdot.active{border-color:var(--accent);color:var(--accent);background:#fff5f5}
+.pdot.done{border-color:var(--accent);background:var(--accent);color:#fff}
+.plbl{font-size:10.5px;color:var(--ink3);white-space:nowrap;position:absolute;top:34px;left:50%;transform:translateX(-50%);font-weight:500;letter-spacing:.02em}
+.pline{flex:1;height:2px;background:var(--paper3);transition:background .3s;margin:0 -1px}
+.pline.done{background:var(--accent)}
+
+/* PAGE */
+.pg{display:none}
+.pg.active{display:block;animation:rise .3s cubic-bezier(.22,.68,0,1.2) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{margin-bottom:36px}
+.htag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:10px}
+.htitle{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;line-height:1.12;margin-bottom:10px}
+.hsub{font-size:14px;color:var(--ink3);max-width:480px;line-height:1.65}
+
+/* FORM */
+.fg{margin-bottom:26px}
+.fl{font-size:13px;font-weight:500;color:var(--ink2);margin-bottom:9px;display:block}
+.fl span{color:var(--ink3);font-weight:400}
+.ti,.ta{width:100%;padding:11px 15px;border:1.5px solid var(--paper3);border-radius:var(--r-sm);background:var(--white);font-family:'DM Sans',sans-serif;font-size:14.5px;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}
+.ta{resize:vertical;min-height:85px;line-height:1.65}
+.ti:focus,.ta:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,77,67,.08)}
+.ti::placeholder,.ta::placeholder{color:var(--ink3);font-size:13.5px}
+
+/* CHIPS multi */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 17px;border-radius:40px;border:1.5px solid var(--paper3);background:var(--white);font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--ink2);cursor:pointer;user-select:none;transition:all .15s}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+
+/* TAGS single */
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{padding:8px 16px;border-radius:var(--r-sm);border:1.5px solid var(--paper3);background:var(--white);font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--ink2);cursor:pointer;user-select:none;transition:all .15s}
+.tag:hover{border-color:var(--navy2);color:var(--navy)}
+.tag.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:500}
+
+/* REVIEW */
+.rcard{background:var(--white);border:1.5px solid var(--paper3);border-radius:var(--r);padding:22px 24px;margin-bottom:28px;box-shadow:var(--sh)}
+.rrow{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--paper2);font-size:14px}
+.rrow:last-child{border-bottom:none;padding-bottom:0}
+.rk{font-weight:500;color:var(--ink2);min-width:130px}
+.rv{color:var(--ink3)}
+
+/* BUTTONS */
+.brow{display:flex;gap:10px;align-items:center;margin-top:32px}
+.btn{padding:12px 26px;border-radius:var(--r-sm);font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .15s;border:none;letter-spacing:.01em}
+.btn-p{background:var(--accent);color:#fff}
+.btn-p:hover{background:var(--accent-d)}
+.btn-p:active{transform:scale(.98)}
+.btn-s{background:transparent;color:var(--ink3);border:1.5px solid var(--paper3);font-family:'DM Sans',sans-serif;font-weight:400}
+.btn-s:hover{border-color:var(--ink3);color:var(--ink)}
+
+/* OUTPUT */
+.outhdr{margin-bottom:28px;padding-bottom:20px;border-bottom:1.5px solid var(--paper3)}
+.outname{font-family:'Syne',sans-serif;font-size:27px;font-weight:800;margin-bottom:6px}
+.outmeta{display:flex;flex-wrap:wrap;gap:8px}
+.opill{background:var(--paper2);padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:500;color:var(--ink3)}
+
+.tbar{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.tbtn{padding:8px 17px;border-radius:var(--r-sm);border:1.5px solid var(--paper3);background:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink2);cursor:pointer;transition:all .15s}
+.tbtn:hover{border-color:var(--navy);color:var(--navy)}
+.tbtn-r{background:var(--accent);border-color:var(--accent);color:#fff}
+.tbtn-r:hover{background:var(--accent-d);color:#fff}
+
+/* BLOCK HEADER */
+.bkhdr{background:var(--navy);color:#fff;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:var(--r-sm);margin:30px 0 14px}
+
+/* STEP CARD */
+.sc{background:var(--white);border:1.5px solid var(--paper3);border-radius:var(--r);padding:20px 22px;margin-bottom:12px;box-shadow:var(--sh)}
+.schdr{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap}
+.dtag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
+.cbdg{display:inline-block;padding:2px 9px;border-radius:4px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.cli{background:var(--li-bg);color:var(--li-fg)}
+.cem{background:var(--em-bg);color:var(--em-fg)}
+.ctel{background:var(--tel-bg);color:var(--tel-fg)}
+.sct{font-family:'Syne',sans-serif;font-size:14.5px;font-weight:700;color:var(--ink)}
+
+/* COPY BOX */
+.cb{background:var(--paper);border:1px solid var(--paper3);border-radius:var(--r-sm);padding:13px 14px;margin:9px 0;position:relative}
+.clbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:5px}
+.ct{font-size:13px;color:var(--ink2);line-height:1.75;white-space:pre-wrap;padding-right:60px}
+.cpbtn{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--paper3);background:var(--white);font-size:11px;color:var(--ink3);cursor:pointer;transition:all .15s}
+.cpbtn:hover{border-color:var(--accent);color:var(--accent)}
+.cpbtn.ok{color:#15803d;border-color:#15803d}
+
+.objl{margin-top:9px;font-size:12px;color:var(--ink3)}
+.objl b{color:var(--ink2)}
+.notestrip{background:#eff6ff;border-left:3px solid #3b82f6;border-radius:0 var(--r-sm) var(--r-sm) 0;padding:9px 13px;margin:9px 0;font-size:12.5px;color:var(--ink2);line-height:1.6}
+
+/* BRANCH */
+.brcard{background:var(--white);border:1.5px solid var(--paper3);border-radius:var(--r);padding:18px 22px;box-shadow:var(--sh)}
+.brrow{padding:9px 0;border-bottom:1px solid var(--paper2);font-size:13.5px;line-height:1.65;display:flex;gap:10px}
+.brrow:last-child{border-bottom:none;padding-bottom:0}
+.brif{font-weight:600;color:var(--navy);min-width:190px;font-size:13px}
+.brthen{color:var(--ink2)}
+
+/* LOADER */
+.ldwrap{text-align:center;padding:70px 0}
+.spinner{width:32px;height:32px;border:3px solid var(--paper3);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ldtxt{font-size:13.5px;color:var(--ink3)}
+
+.errbox{background:#fff5f5;border:1.5px solid #fca5a5;border-radius:var(--r);padding:20px 22px;color:#b91c1c;font-size:14px}
+
+@media(max-width:600px){
+  .wrap{padding:36px 16px 80px}
+  .hdr{padding:0 16px}
+  .htitle{font-size:24px}
+  .plbl{display:none}
+  .brif{min-width:120px}
+}
+@media print{
+  .hdr,.tbar,.brow,#loaderWrap,.cpbtn{display:none!important}
+  body{background:#fff}
+  .sc,.brcard{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo"><em>Human</em>funnel</div>
+  <div class="hdr-tag">Sequence Builder</div>
+</header>
+
+<div class="wrap">
+
+  <!-- PROGRESS -->
+  <div class="prog" id="prog">
+    <div class="pdot active" id="pd0" style="position:relative">1<span class="plbl">Cliente</span></div>
+    <div class="pline" id="pl0"></div>
+    <div class="pdot" id="pd1" style="position:relative">2<span class="plbl">Target</span></div>
+    <div class="pline" id="pl1"></div>
+    <div class="pdot" id="pd2" style="position:relative">3<span class="plbl">Canales</span></div>
+    <div class="pline" id="pl2"></div>
+    <div class="pdot" id="pd3" style="position:relative">4<span class="plbl">Revisar</span></div>
+    <div class="pline" id="pl3"></div>
+    <div class="pdot" id="pd4" style="position:relative">5<span class="plbl">Secuencia</span></div>
+  </div>
+
+  <!-- PAGE 0 -->
+  <div class="pg active" id="pg0">
+    <div class="hero">
+      <div class="htag">Paso 1 de 4</div>
+      <div class="htitle">Datos del cliente</div>
+      <div class="hsub">Introduce la información básica sobre el cliente para el que vas a construir la secuencia.</div>
+    </div>
+    <div class="fg">
+      <label class="fl">Nombre del cliente *</label>
+      <input class="ti" id="f-name" placeholder="ej. Logixs">
+    </div>
+    <div class="fg">
+      <label class="fl">Propuesta de valor <span>— ¿qué venden y a quién? *</span></label>
+      <textarea class="ta" id="f-prop" placeholder="ej. Consultora de Agentic AI que conecta ERP, MES y sensores para automatizar decisiones críticas de planta en tiempo real para productores de alimentación con múltiples plantas."></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Casos de éxito o referencias <span>(opcional)</span></label>
+      <textarea class="ta" id="f-cases" style="min-height:70px" placeholder="ej. Redujeron el tiempo de detección de paradas de 90 a 5 min en una productora de 3 plantas."></textarea>
+    </div>
+    <div class="brow">
+      <button class="btn btn-p" onclick="nav(1)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 1 -->
+  <div class="pg" id="pg1">
+    <div class="hero">
+      <div class="htag">Paso 2 de 4</div>
+      <div class="htitle">Perfil del decisor</div>
+      <div class="hsub">¿A quién va dirigida la secuencia? Puedes seleccionar varios roles.</div>
+    </div>
+    <div class="fg">
+      <label class="fl">Rol del decisor *</label>
+      <div class="chips" id="roles">
+        <div class="chip" data-v="COO / Director de Operaciones">COO / Director de Operaciones</div>
+        <div class="chip" data-v="CIO / Director de IT">CIO / Director de IT</div>
+        <div class="chip" data-v="Director de Planta">Director de Planta</div>
+        <div class="chip" data-v="CEO / Dirección General">CEO / Dirección General</div>
+        <div class="chip" data-v="VP of Sales">VP of Sales</div>
+        <div class="chip" data-v="Head of Marketing">Head of Marketing</div>
+        <div class="chip" data-v="CFO / Director Financiero">CFO / Director Financiero</div>
+        <div class="chip" data-v="CTO / Director Técnico">CTO / Director Técnico</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Mercado geográfico *</label>
+      <div class="tags" id="geo">
+        <div class="tag" data-v="España">España</div>
+        <div class="tag" data-v="LATAM">LATAM</div>
+        <div class="tag" data-v="España + LATAM">España + LATAM</div>
+        <div class="tag" data-v="Europa">Europa</div>
+        <div class="tag" data-v="Global">Global</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Sector / industria del prospect <span>(opcional)</span></label>
+      <input class="ti" id="f-sector" placeholder="ej. Alimentación, SaaS, Industria, Retail...">
+    </div>
+    <div class="brow">
+      <button class="btn btn-s" onclick="nav(0)">← Atrás</button>
+      <button class="btn btn-p" onclick="nav(2)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="pg" id="pg2">
+    <div class="hero">
+      <div class="htag">Paso 3 de 4</div>
+      <div class="htitle">Canales y configuración</div>
+      <div class="hsub">Define cómo opera la secuencia.</div>
+    </div>
+    <div class="fg">
+      <label class="fl">Canales a usar *</label>
+      <div class="chips" id="channels">
+        <div class="chip" data-v="LinkedIn">LinkedIn</div>
+        <div class="chip" data-v="Email">Email en frío</div>
+        <div class="chip" data-v="Llamada">Llamada telefónica</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Tono de los mensajes *</label>
+      <div class="tags" id="tono">
+        <div class="tag" data-v="directo y consultivo">Directo y consultivo</div>
+        <div class="tag" data-v="cercano y conversacional">Cercano y conversacional</div>
+        <div class="tag" data-v="formal y técnico">Formal y técnico</div>
+        <div class="tag" data-v="challenger — provoca reflexión">Challenger</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Duración de la secuencia *</label>
+      <div class="tags" id="duracion">
+        <div class="tag" data-v="10 días — 5 touchpoints">10 días (5 touchpoints)</div>
+        <div class="tag on" data-v="21 días — 7 touchpoints">21 días (7 touchpoints)</div>
+        <div class="tag" data-v="30 días — 9 touchpoints">30 días (9 touchpoints)</div>
+      </div>
+    </div>
+    <div class="brow">
+      <button class="btn btn-s" onclick="nav(1)">← Atrás</button>
+      <button class="btn btn-p" onclick="nav(3)">Continuar →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3 -->
+  <div class="pg" id="pg3">
+    <div class="hero">
+      <div class="htag">Paso 4 de 4</div>
+      <div class="htitle">Revisar y generar</div>
+      <div class="hsub">Confirma la configuración antes de generar los copies.</div>
+    </div>
+    <div class="rcard" id="reviewCard"></div>
+    <div class="brow">
+      <button class="btn btn-s" onclick="nav(2)">← Atrás</button>
+      <button class="btn btn-p" onclick="generate()">Generar secuencia →</button>
+    </div>
+  </div>
+
+  <!-- PAGE 4 -->
+  <div class="pg" id="pg4">
+    <div class="outhdr">
+      <div class="outname" id="outName">Secuencia generada</div>
+      <div class="outmeta" id="outMeta"></div>
+    </div>
+    <div class="tbar">
+      <button class="tbtn tbtn-r" onclick="copyAll()">Copiar todo el texto</button>
+      <button class="tbtn" onclick="window.print()">Imprimir / PDF</button>
+      <button class="tbtn" onclick="resetApp()">Nueva secuencia</button>
+    </div>
+    <div id="loaderWrap" class="ldwrap">
+      <div class="spinner"></div>
+      <div class="ldtxt" id="ldtxt">Generando secuencia personalizada...</div>
+    </div>
+    <div id="seqOut" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+const S={name:'',prop:'',cases:'',roles:[],geo:'',sector:'',channels:[],tono:'',duracion:'21 días — 7 touchpoints'};
+
+// multi-chip toggle
+document.querySelectorAll('.chips .chip').forEach(c=>
+  c.addEventListener('click',()=>c.classList.toggle('on'))
+);
+// single-tag toggle
+document.querySelectorAll('#geo .tag,#tono .tag,#duracion .tag').forEach(t=>
+  t.addEventListener('click',()=>{
+    t.closest('.tags').querySelectorAll('.tag').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+  })
+);
+
+function nav(to){
+  if(to>0&&!validate(to-1))return;
+  if(to===3)buildReview();
+  document.querySelectorAll('.pg').forEach((p,i)=>p.classList.toggle('active',i===to));
+  for(let i=0;i<=4;i++){
+    const d=document.getElementById('pd'+i);
+    const l=document.getElementById('pl'+i);
+    d.classList.remove('active','done');
+    if(l)l.classList.remove('done');
+    if(i<to){d.classList.add('done');if(l)l.classList.add('done');}
+    if(i===to)d.classList.add('active');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function validate(pg){
+  if(pg===0){
+    S.name=document.getElementById('f-name').value.trim();
+    S.prop=document.getElementById('f-prop').value.trim();
+    S.cases=document.getElementById('f-cases').value.trim();
+    if(!S.name||!S.prop){alert('Rellena el nombre y la propuesta de valor.');return false;}
+  }
+  if(pg===1){
+    S.roles=[...document.querySelectorAll('#roles .chip.on')].map(c=>c.dataset.v);
+    S.geo=document.querySelector('#geo .tag.on')?.dataset.v||'';
+    S.sector=document.getElementById('f-sector').value.trim();
+    if(!S.roles.length){alert('Selecciona al menos un rol.');return false;}
+    if(!S.geo){alert('Selecciona un mercado geográfico.');return false;}
+  }
+  if(pg===2){
+    S.channels=[...document.querySelectorAll('#channels .chip.on')].map(c=>c.dataset.v);
+    S.tono=document.querySelector('#tono .tag.on')?.dataset.v||'';
+    S.duracion=document.querySelector('#duracion .tag.on')?.dataset.v||'21 días — 7 touchpoints';
+    if(!S.channels.length){alert('Selecciona al menos un canal.');return false;}
+    if(!S.tono){alert('Selecciona el tono.');return false;}
+  }
+  return true;
+}
+
+function buildReview(){
+  document.getElementById('reviewCard').innerHTML=[
+    ['Cliente',S.name],
+    ['Propuesta de valor',S.prop.length>100?S.prop.slice(0,100)+'…':S.prop],
+    ['Casos de éxito',S.cases||'—'],
+    ['Decisores',S.roles.join(', ')],
+    ['Mercado',S.geo+(S.sector?' · '+S.sector:'')],
+    ['Canales',S.channels.join(', ')],
+    ['Tono',S.tono],
+    ['Duración',S.duracion],
+  ].map(([k,v])=>`<div class="rrow"><span class="rk">${k}</span><span class="rv">${v}</span></div>`).join('');
+}
+
+async function generate(){
+  nav(4);
+  document.getElementById('loaderWrap').style.display='block';
+  document.getElementById('seqOut').style.display='none';
+  document.getElementById('outName').textContent=S.name+' — Secuencia Outbound';
+  document.getElementById('outMeta').innerHTML=
+    [S.roles.join(' · '),S.geo,S.channels.join(' + '),S.duracion]
+    .map(t=>`<span class="opill">${t}</span>`).join('');
+
+  const msgs=['Analizando propuesta de valor...','Construyendo ángulos de copy...','Personalizando mensajes...','Casi listo...'];
+  let mi=0;
+  const itv=setInterval(()=>{mi=(mi+1)%msgs.length;document.getElementById('ldtxt').textContent=msgs[mi];},1800);
+
+  const n=S.duracion.includes('5')?5:S.duracion.includes('9')?9:7;
+  const prompt=`Genera una secuencia outbound B2B con ${n} touchpoints.
+
+CLIENTE: ${S.name}
+PROPUESTA DE VALOR: ${S.prop}
+CASOS DE EXITO: ${S.cases||'No disponibles aun. Usa hipotesis creibles y especificas al sector.'}
+DECISOR OBJETIVO: ${S.roles.join(', ')}
+MERCADO: ${S.geo}
+SECTOR: ${S.sector||'No especificado'}
+CANALES: ${S.channels.join(', ')}
+TONO: ${S.tono}
+DURACION: ${S.duracion}
+
+INSTRUCCIONES:
+- Distribuye touchpoints en dias concretos (para 7: dias 1,3,5,8,11,14,21)
+- Usa todos los canales disponibles de forma inteligente
+- Cada touchpoint ataca un angulo distinto del mismo dolor
+- Si hay LinkedIn: primer touchpoint es connection request sin pitch
+- Ultimo touchpoint es siempre break-up email (canal Email)
+- Adapta copies al sector, rol y tono indicados
+- Copies directos, sin florituras, orientados al dolor operativo del decisor
+
+Devuelve SOLO JSON sin markdown. Estructura:
+{"steps":[{"day":"Dia 1","channel":"LinkedIn","title":"titulo breve","subject":"","body":"copy completo","objetivo":"que quieres conseguir","note":""}],"branches":[{"if":"condicion","then":"accion"}]}
+
+Reglas:
+- channel: solo LinkedIn Email o Llamada
+- subject: solo para Email (string vacio para otros)
+- note: string vacio si no hay nota relevante
+- branches: exactamente 4 reglas de ramificacion
+- USA COMILLAS SIMPLES dentro de los textos del JSON, NUNCA comillas dobles que rompan la sintaxis`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:'Eres experto en outbound B2B. Respondes SOLO JSON valido sin texto extra ni markdown.',
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const raw=(data.content||[]).find(b=>b.type==='text')?.text||'';
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const seq=JSON.parse(clean);
+    clearInterval(itv);
+    renderSeq(seq);
+  }catch(e){
+    clearInterval(itv);
+    document.getElementById('loaderWrap').innerHTML=
+      `<div class="errbox">Error al generar la secuencia. Comprueba la conexion e intenta de nuevo.<br><small style="opacity:.6">${e.message}</small></div>`;
+  }
+}
+
+function renderSeq(seq){
+  document.getElementById('loaderWrap').style.display='none';
+  const el=document.getElementById('seqOut');
+  el.style.display='block';
+
+  const steps=seq.steps||[];
+  const total=steps.length;
+  // split into 2-3 blocks
+  const sizes=total<=5?[2,3]:total<=7?[3,2,2]:[3,3,3];
+  const bLabels=['Bloque 1 — Primer contacto','Bloque 2 — Seguimiento','Bloque 3 — Cierre de secuencia'];
+  const blocks=[];
+  let idx=0;
+  sizes.forEach((sz,bi)=>{
+    blocks.push({label:bLabels[bi]||'Bloque '+(bi+1),steps:steps.slice(idx,idx+sz)});
+    idx+=sz;
+  });
+  if(idx<steps.length)blocks[blocks.length-1].steps.push(...steps.slice(idx));
+
+  let html='';
+  let allTxt=`SECUENCIA OUTBOUND — ${S.name}\n${'='.repeat(50)}\n\n`;
+
+  blocks.forEach(block=>{
+    html+=`<div class="bkhdr">${block.label}</div>`;
+    block.steps.forEach((step,si)=>{
+      const bc=step.channel==='LinkedIn'?'cli':step.channel==='Email'?'cem':'ctel';
+      const cid=`c${block.label.slice(-1)}${si}`;
+      let h=`<div class="sc"><div class="schdr">
+        <span class="dtag">${x(step.day)}</span>
+        <span class="cbdg ${bc}">${x(step.channel)}</span>
+        <span class="sct">${x(step.title)}</span>
+      </div>`;
+
+      if(step.subject){
+        const sid=cid+'s';
+        h+=`<div class="cb"><div class="clbl">Asunto</div><div class="ct" id="${sid}">${x(step.subject)}</div><button class="cpbtn" onclick="cpb('${sid}',this)">Copiar</button></div>`;
+        allTxt+=`[${step.day} — ${step.channel}] ${step.title}\nASUNTO: ${step.subject}\n`;
+      }else{
+        allTxt+=`[${step.day} — ${step.channel}] ${step.title}\n`;
+      }
+
+      const bid=cid+'b';
+      const blbl=step.channel==='Llamada'?'Script / Voicemail':'Mensaje';
+      h+=`<div class="cb"><div class="clbl">${blbl}</div><div class="ct" id="${bid}">${x(step.body)}</div><button class="cpbtn" onclick="cpb('${bid}',this)">Copiar</button></div>`;
+      allTxt+=`${step.body}\n`;
+
+      if(step.note)h+=`<div class="notestrip"><strong>Nota:</strong> ${x(step.note)}</div>`;
+      h+=`<div class="objl"><b>Objetivo:</b> ${x(step.objetivo)}</div></div>`;
+      html+=h;
+      allTxt+=`→ Objetivo: ${step.objetivo}\n\n`;
+    });
+  });
+
+  html+=`<div class="bkhdr">Lógica de ramificación</div><div class="brcard">`;
+  (seq.branches||[]).forEach(b=>{
+    html+=`<div class="brrow"><span class="brif">${x(b.if)}</span><span class="brthen">→ ${x(b.then)}</span></div>`;
+    allTxt+=`SI: ${b.if}\nENTONCES: ${b.then}\n`;
+  });
+  html+=`</div>`;
+
+  el.innerHTML=html;
+  el.dataset.allText=allTxt;
+}
+
+function x(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function cpb(id,btn){
+  const t=document.getElementById(id)?.innerText||'';
+  navigator.clipboard.writeText(t).then(()=>{
+    btn.textContent='✓';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('ok');},1800);
+  });
+}
+
+function copyAll(){
+  const t=document.getElementById('seqOut')?.dataset.allText||'';
+  navigator.clipboard.writeText(t).then(()=>{
+    const b=document.querySelector('.tbtn-r');
+    const o=b.textContent;b.textContent='✓ Copiado';
+    setTimeout(()=>b.textContent=o,2000);
+  });
+}
+
+function resetApp(){
+  ['f-name','f-prop','f-cases','f-sector'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.chip.on,.tag.on').forEach(el=>el.classList.remove('on'));
+  document.querySelector('#duracion .tag[data-v="21 días — 7 touchpoints"]').classList.add('on');
+  Object.assign(S,{name:'',prop:'',cases:'',roles:[],geo:'',sector:'',channels:[],tono:'',duracion:'21 días — 7 touchpoints'});
+  nav(0);
+}
+</script>
+</body>
+</html>

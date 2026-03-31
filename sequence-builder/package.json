@@ -1,0 +1,12 @@
+{
+  "name": "sequence-builder",
+  "version": "1.0.0",
+  "description": "Humanfunnel Sequence Builder — powered by Claude",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}
