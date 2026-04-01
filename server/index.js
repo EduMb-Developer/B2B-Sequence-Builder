@@ -5,10 +5,9 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const allowedOrigin = (process.env.FRONTEND_URL || 'http://localhost:5173').trim().replace(/\/+$/, '');
 app.use(cors({
-  origin: process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.replace(/\/+$/, '')
-    : 'http://localhost:5173',
+  origin: allowedOrigin,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
 }));
