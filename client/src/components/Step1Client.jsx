@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+const API = import.meta.env.VITE_API_URL || '';
+
 export default function Step1Client({ form, update, onNext }) {
   const [scraping, setScraping] = useState(false);
   const [scrapeStatus, setScrapeStatus] = useState(''); // '' | 'loading' | 'success' | 'error'
@@ -10,7 +12,7 @@ export default function Step1Client({ form, update, onNext }) {
     setScraping(true);
     setScrapeStatus('loading');
     try {
-      const resp = await fetch('/api/scrape', {
+      const resp = await fetch(`${API}/api/scrape`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),

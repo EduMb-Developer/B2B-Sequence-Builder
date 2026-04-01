@@ -7,6 +7,8 @@ import Step3Channels from './components/Step3Channels';
 import Step4Review from './components/Step4Review';
 import SequenceOutput from './components/SequenceOutput';
 
+const API = import.meta.env.VITE_API_URL || '';
+
 const INITIAL_STATE = {
   name: '', url: '', prop: '', cases: '',
   roles: [], customRoles: '', sector: '', geo: '',
@@ -101,7 +103,7 @@ Devuelve SOLO JSON valido sin markdown:
 channel: solo LinkedIn Email o Llamada. subject: solo para Email. note: vacio si no aplica. 4 branches obligatorios. Usa \\n para saltos de linea.`;
 
     try {
-      const resp = await fetch('/api/generate', {
+      const resp = await fetch(`${API}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -125,7 +127,7 @@ channel: solo LinkedIn Email o Llamada. subject: solo para Email. note: vacio si
   const exportDocx = async () => {
     const allRoles = getAllRoles();
     try {
-      const resp = await fetch('/api/export', {
+      const resp = await fetch(`${API}/api/export`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
