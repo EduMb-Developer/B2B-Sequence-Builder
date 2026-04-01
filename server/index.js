@@ -6,10 +6,15 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  methods: ['POST'],
+  origin: process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.replace(/\/+$/, '')
+    : 'http://localhost:5173',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
 }));
 app.use(express.json({ limit: '2mb' }));
+
+app.get('/', (req, res) => res.json({ status: 'ok' }));
 
 app.use('/api/generate', require('./routes/generate'));
 app.use('/api/scrape', require('./routes/scrape'));
