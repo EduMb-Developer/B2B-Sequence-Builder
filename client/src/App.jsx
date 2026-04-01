@@ -1,4 +1,6 @@
 import { useState, useCallback } from 'react';
+import { useAuth } from './context/AuthContext';
+import LoginPage from './pages/LoginPage';
 import Topbar from './components/Topbar';
 import StepsBar from './components/StepsBar';
 import Step1Client from './components/Step1Client';
@@ -16,6 +18,7 @@ const INITIAL_STATE = {
 };
 
 export default function App() {
+  const { user, loading: authLoading, getAccessToken } = useAuth();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(INITIAL_STATE);
   const [result, setResult] = useState(null);
@@ -66,6 +69,14 @@ export default function App() {
     return roles;
   };
 
+  const authHeaders = async () => {
+    const token = await getAccessToken();
+    return {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   const generate = async () => {
     goTo(4);
     setLoading(true);
@@ -103,9 +114,10 @@ Devuelve SOLO JSON valido sin markdown:
 channel: solo LinkedIn Email o Llamada. subject: solo para Email. note: vacio si no aplica. 4 branches obligatorios. Usa \\n para saltos de linea.`;
 
     try {
+      const headers = await authHeaders();
       const resp = await fetch(`${API}/api/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
           max_tokens: 4096,
@@ -127,9 +139,10 @@ channel: solo LinkedIn Email o Llamada. subject: solo para Email. note: vacio si
   const exportDocx = async () => {
     const allRoles = getAllRoles();
     try {
+      const headers = await authHeaders();
       const resp = await fetch(`${API}/api/export`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           clientName: form.name,
           roles: allRoles,
@@ -161,6 +174,23 @@ channel: solo LinkedIn Email o Llamada. subject: solo para Email. note: vacio si
     setLoading(false);
     goTo(0);
   };
+
+  // Auth loading
+  if (authLoading) {
+    return (
+      <div className="wrap">
+        <div className="loading">
+          <div className="spin"></div>
+          <div className="lmsg">Cargando...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in
+  if (!user) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="wrap">

@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const API = import.meta.env.VITE_API_URL || '';
 
 export default function Step1Client({ form, update, onNext }) {
+  const { getAccessToken } = useAuth();
   const [scraping, setScraping] = useState(false);
   const [scrapeStatus, setScrapeStatus] = useState(''); // '' | 'loading' | 'success' | 'error'
 
@@ -12,9 +14,13 @@ export default function Step1Client({ form, update, onNext }) {
     setScraping(true);
     setScrapeStatus('loading');
     try {
+      const token = await getAccessToken();
       const resp = await fetch(`${API}/api/scrape`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ url }),
       });
       const data = await resp.json();
