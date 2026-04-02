@@ -48,7 +48,7 @@ export default function Step1Client({ form, update, onNext }) {
 
       <div className="fl">
         <label className="flb">Nombre del cliente / empresa *</label>
-        <input type="text" value={form.name} onChange={e => update({ name: e.target.value })} placeholder="ej. Logixs" />
+        <input type="text" value={form.name} onChange={e => update({ name: e.target.value })} placeholder="ej. Human Funnel" />
       </div>
 
       <div className="fl">

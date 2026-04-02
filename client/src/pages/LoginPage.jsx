@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, denied } = useAuth();
 
   return (
     <div className="wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '80vh' }}>
@@ -14,6 +14,11 @@ export default function LoginPage() {
         <div className="ps" style={{ marginBottom: 32, maxWidth: '100%' }}>
           Inicia sesión para generar secuencias outbound personalizadas.
         </div>
+        {denied && (
+          <div className="err" style={{ marginBottom: 20, textAlign: 'left' }}>
+            Acceso restringido a cuentas <strong>@humanfunnel.es</strong>. Inicia sesión con tu email corporativo.
+          </div>
+        )}
         <button
           className="btn btn-p"
           onClick={signInWithGoogle}

@@ -18,6 +18,11 @@ async function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Token inválido' });
   }
 
+  const ALLOWED_DOMAIN = 'humanfunnel.es';
+  if (!user.email || !user.email.endsWith('@' + ALLOWED_DOMAIN)) {
+    return res.status(403).json({ error: 'Acceso restringido a @' + ALLOWED_DOMAIN });
+  }
+
   req.user = user;
   next();
 }
