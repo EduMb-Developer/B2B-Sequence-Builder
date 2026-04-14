@@ -107,6 +107,7 @@ Buenas practicas Apollo (obligatorio):
 - Primer LinkedIn = solo conexion, cero pitch
 - Ultimo paso = break-up email con puerta abierta
 - Cada paso ataca angulo distinto del mismo dolor
+- IMPORTANTE: cada email debe centrarse en UN SOLO dolor y UN SOLO valor. No mezclar multiples problemas ni multiples beneficios en el mismo mensaje. Un dolor claro, una propuesta de valor directa. Frases cortas y separadas, no subordinadas largas.
 
 Devuelve SOLO JSON valido sin markdown:
 {"steps":[{"day":"Dia 1","channel":"LinkedIn","title":"titulo","subject":"","body":"texto","objetivo":"objetivo","note":""}],"branches":[{"cond":"condicion","action":"accion"}]}
