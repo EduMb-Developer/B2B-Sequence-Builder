@@ -87,6 +87,7 @@ export default function App() {
     const n = form.dur.includes('5') ? 5 : form.dur.includes('9') ? 9 : 7;
     const days = { 5: '1,3,7,12,18', 7: '1,3,5,8,11,14,21', 9: '1,3,5,8,11,14,18,24,30' };
 
+    const canalesPermitidos = form.ch.join(', ');
     const prompt = `Genera una secuencia outbound B2B con exactamente ${n} touchpoints.
 
 CLIENTE: ${form.name}
@@ -95,24 +96,32 @@ CASOS: ${form.cases || 'Sin casos reales. Usa hipotesis creibles y cuantificadas
 DECISOR: ${allRoles.join(', ')}
 SECTOR: ${form.sector}
 MERCADO: ${form.geo}
-CANALES: ${form.ch.join(', ')}
+CANALES PERMITIDOS: ${canalesPermitidos}
 TONO: ${form.tono}
 DIAS: ${days[n]}
+
+REGLA CRITICA DE CANALES (obligatoria, no negociable):
+- Usa EXCLUSIVAMENTE los canales listados en CANALES PERMITIDOS: ${canalesPermitidos}.
+- NO generes pasos en ningun otro canal bajo ninguna circunstancia.
+- Si CANALES PERMITIDOS solo contiene "Email", TODOS los ${n} touchpoints deben ser Email. Cero LinkedIn, cero Llamada.
+- Si CANALES PERMITIDOS solo contiene "LinkedIn", TODOS los ${n} touchpoints deben ser LinkedIn.
+- El campo "channel" de cada step debe coincidir literalmente con uno de los valores de CANALES PERMITIDOS.
+- Si un canal no esta en CANALES PERMITIDOS, esta PROHIBIDO. No lo uses aunque parezca natural.
 
 Buenas practicas Apollo (obligatorio):
 - Asuntos de 3-5 palabras maximo
 - Emails de maximo 5-7 lineas
 - Sin presentacion corporativa
 - Una sola pregunta al final de cada email
-- Primer LinkedIn = solo conexion, cero pitch
-- Ultimo paso = break-up email con puerta abierta
+- Si y solo si LinkedIn esta permitido: el primer LinkedIn = solo conexion, cero pitch
+- Ultimo paso = break-up con puerta abierta (en el canal permitido correspondiente)
 - Cada paso ataca angulo distinto del mismo dolor
 - IMPORTANTE: cada email debe centrarse en UN SOLO dolor y UN SOLO valor. No mezclar multiples problemas ni multiples beneficios en el mismo mensaje. Un dolor claro, una propuesta de valor directa. Frases cortas y separadas, no subordinadas largas.
 
 Devuelve SOLO JSON valido sin markdown:
-{"steps":[{"day":"Dia 1","channel":"LinkedIn","title":"titulo","subject":"","body":"texto","objetivo":"objetivo","note":""}],"branches":[{"cond":"condicion","action":"accion"}]}
+{"steps":[{"day":"Dia 1","channel":"<uno de: ${canalesPermitidos}>","title":"titulo","subject":"","body":"texto","objetivo":"objetivo","note":""}],"branches":[{"cond":"condicion","action":"accion"}]}
 
-channel: solo LinkedIn Email o Llamada. subject: solo para Email. note: vacio si no aplica. 4 branches obligatorios. Usa \\n para saltos de linea.`;
+channel: SOLO uno de ${canalesPermitidos}, ningun otro. subject: solo para Email. note: vacio si no aplica. 4 branches obligatorios. Usa \\n para saltos de linea.`;
 
     try {
       const headers = await authHeaders();
